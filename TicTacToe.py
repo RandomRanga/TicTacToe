@@ -22,6 +22,10 @@ class Board:
     def mark_sqr(self, row, col, player):
         self.squares[row][col] = player
 
+    #Checks if square is empty return bool
+    def empty_sqr(self, row, col):
+        return self.squares[row][col] == 0
+
 
 
 
@@ -48,6 +52,10 @@ class Game:
         # pygame.draw.line(WIN, LINE_COLOR, (3 * SQSIZE, 0), (3 * SQSIZE, HEIGHT), LINE_WIDTH)
         # pygame.draw.line(WIN, LINE_COLOR, (0, (3 * SQSIZE)), (WIDTH, (3 * SQSIZE)), LINE_WIDTH)
         # pygame.draw.line(WIN, LINE_COLOR, (0, 0), (WIDTH, 0), LINE_WIDTH)
+
+    #Changes whos turn it is
+    def next_turn(self):
+        self.player = self.player % 2 + 1
       
 
 
@@ -72,10 +80,12 @@ def main():
                 #use floor division to find which square somone has clicked on
                 row = pos[1] // SQSIZE
                 col = pos[0] // SQSIZE
-
-                board.mark_sqr(row,col, 1)
-
-                print(game.board.squares)
+                
+                #Ensures square is empty then marks it with correct player
+                if board.empty_sqr(row, col):
+                    board.mark_sqr(row, col, game.player)
+                    game.next_turn()
+                    print(board.squares)
                 
 
 
