@@ -33,7 +33,7 @@ class Game:
 
     def __init__(self):
         self.board = Board()
-        self.player = 1
+        self.player = 1  # 1 = X   2 = O
         self.showlines()
 
     def showlines(self):
@@ -53,10 +53,34 @@ class Game:
         # pygame.draw.line(WIN, LINE_COLOR, (0, (3 * SQSIZE)), (WIDTH, (3 * SQSIZE)), LINE_WIDTH)
         # pygame.draw.line(WIN, LINE_COLOR, (0, 0), (WIDTH, 0), LINE_WIDTH)
 
+    #Draws a circle or cross in the correct location 
+    def draw_fig(self, row, col):
+        
+        if self.player == 1: 
+            #Draws a cross
+            #Descending line 
+            start_desc = (col * SQSIZE + OFFSET, row * SQSIZE + OFFSET)
+            end_desc = (col * SQSIZE + SQSIZE - OFFSET, row * SQSIZE + SQSIZE - OFFSET )
+            pygame.draw.line(WIN, X_COLOR, start_desc, end_desc, XO_WIDTH )
+            #Accending line
+            start_asc = (col * SQSIZE + OFFSET, row * SQSIZE + SQSIZE - OFFSET)
+            end_asc = (col * SQSIZE + SQSIZE - OFFSET, row * SQSIZE + OFFSET )
+            pygame.draw.line(WIN, X_COLOR, start_asc, end_asc, XO_WIDTH )
+
+
+            
+
+        
+        if self.player == 2: 
+            print(self.player)
+            #Draws a circle
+            center = (col * SQSIZE + SQSIZE // 2, row * SQSIZE + SQSIZE // 2 )
+            pygame.draw.circle(WIN, O_COLOR, center, RADIUS, XO_WIDTH)
+
+
     #Changes whos turn it is
     def next_turn(self):
         self.player = self.player % 2 + 1
-      
 
 
 
@@ -84,8 +108,13 @@ def main():
                 #Ensures square is empty then marks it with correct player
                 if board.empty_sqr(row, col):
                     board.mark_sqr(row, col, game.player)
+                    game.draw_fig(row, col)
+
                     game.next_turn()
+                    
+                    
                     print(board.squares)
+                    
                 
 
 
