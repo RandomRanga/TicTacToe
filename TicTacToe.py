@@ -1,5 +1,6 @@
 import pygame
 import sys
+import numpy as np
 
 from constants import *
 
@@ -10,9 +11,25 @@ pygame.display.set_caption('Tic Tac Toe')
 WIN.fill(BG_COLOR)
 
 
+class Board:
+
+    #Creates a matrix of zeros with dimentions rows, cols 
+    def __init__(self):
+        self.squares = np.zeros((ROWS, COLS))
+        print(self.squares)
+
+    #Marks the correct square with correct player
+    def mark_sqr(self, row, col, player):
+        self.squares[row][col] = player
+
+
+
+
 class Game:
 
     def __init__(self):
+        self.board = Board()
+        self.player = 1
         self.showlines()
 
     def showlines(self):
@@ -40,6 +57,7 @@ def main():
 
     #Creates the board
     game = Game()
+    board = game.board
 
 
     while True:
@@ -48,6 +66,19 @@ def main():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            #Checks for when mouse button is press
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pos = event.pos
+                #use floor division to find which square somone has clicked on
+                row = pos[1] // SQSIZE
+                col = pos[0] // SQSIZE
+
+                board.mark_sqr(row,col, 1)
+
+                print(game.board.squares)
+                
+
+
 
         pygame.display.update()
 
