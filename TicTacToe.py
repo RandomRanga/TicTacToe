@@ -16,15 +16,39 @@ class Board:
     #Creates a matrix of zeros with dimentions rows, cols 
     def __init__(self):
         self.squares = np.zeros((ROWS, COLS))
-        print(self.squares)
+        #List of empty squares, at start is all the squares
+        self.empty_sqrs = self.squares
+        #Num of squares with something in them
+        self.marked_sqrs = 0
+
 
     #Marks the correct square with correct player
     def mark_sqr(self, row, col, player):
         self.squares[row][col] = player
+        self.marked_sqrs += 1
 
     #Checks if square is empty return bool
     def empty_sqr(self, row, col):
         return self.squares[row][col] == 0
+
+    #Finds which squares are emtpy and returns them
+    def get_empty_sqrs(self):
+        empty_sqrs = []
+        for row in range(ROWS):
+            for col in range(COLS):
+                if self.empty_sqr(row, col):
+                    empty_sqrs.append((row, col))
+        return empty_sqrs
+
+    #Checks if all the squares have been marked 
+    def isfull(self):
+        return self.mark_sqr == 9
+
+    #Checks if all the squares are empty
+    def isempty(self):
+        return self.empty_sqr == 0 
+
+    
 
 
 
@@ -72,7 +96,6 @@ class Game:
 
         
         if self.player == 2: 
-            print(self.player)
             #Draws a circle
             center = (col * SQSIZE + SQSIZE // 2, row * SQSIZE + SQSIZE // 2 )
             pygame.draw.circle(WIN, O_COLOR, center, RADIUS, XO_WIDTH)
@@ -113,7 +136,7 @@ def main():
                     game.next_turn()
                     
                     
-                    print(board.squares)
+             
                     
                 
 
