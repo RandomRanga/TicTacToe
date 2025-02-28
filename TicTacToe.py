@@ -22,6 +22,79 @@ class Board:
         self.marked_sqrs = 0
 
 
+    def final_state(self, show = False):
+        '''
+            @return 0 if there is no win yet 
+            @return 1 if player 1 wins 
+            @return 2 if player 2 wins 
+        '''
+
+        #Vertical wins 
+        for col in range (COLS):
+            #Checks everything in a col is the same and not empty. reutrns winning player
+            if self.squares[0][col] == self.squares[1][col] == self.squares[2][col] != 0:
+                if show: 
+                    if self.squares[0][col] == 2:
+                        color = O_COLOR
+                    else:
+                        color = X_COLOR
+
+                    start_pos = (col * SQSIZE + SQSIZE // 2, 20)
+                    finish_pos = (col * SQSIZE + SQSIZE // 2, HEIGHT - 20)
+
+
+                    pygame.draw.line(WIN, color, start_pos, finish_pos, LINE_WIDTH)
+
+                return self.squares[0][col]
+        
+        #Horizontal wins 
+        for row in range (ROWS):
+            #Checks everything in a row is the same and not empty. reutrns winning player
+            if self.squares[row][0] == self.squares[row][1] == self.squares[row][2] != 0:
+                if show: 
+                    if self.squares[row][0] == 2:
+                        color = O_COLOR
+                    else:
+                        color = X_COLOR
+
+                    start_pos = (2, row * SQSIZE + SQSIZE // 2)
+                    finish_pos = (WIDTH - 20, row * SQSIZE + SQSIZE // 2)
+
+                    pygame.draw.line(WIN, color, start_pos, finish_pos, LINE_WIDTH)
+                return self.squares[row][0]
+
+        #Diagonal wins then returns winning player
+        if self.squares[0][0] == self.squares[1][1] == self.squares[2][2] != 0:
+            if show: 
+                if self.squares[1][1] == 2:
+                    color = O_COLOR
+                else:
+                    color = X_COLOR
+
+                start_pos = (20, 20)
+                finish_pos = (WIDTH - 20, HEIGHT - 20)
+
+                pygame.draw.line(WIN, color, start_pos, finish_pos, LINE_WIDTH)
+            return self.squares[1][1]
+
+
+        if self.squares[2][0] == self.squares [1][1] == self.squares[0][2] != 0:
+            if show: 
+                if self.squares[1][1] == 2:
+                    color = O_COLOR
+                else:
+                    color = X_COLOR
+
+                start_pos = (20, HEIGHT - 20)
+                finish_pos = (WIDTH - 20, 20)
+
+                pygame.draw.line(WIN, color, start_pos, finish_pos, LINE_WIDTH)
+            return self.squares[1][1]
+           
+
+        #If there is no win yet 
+        return 0 
+
     #Marks the correct square with correct player
     def mark_sqr(self, row, col, player):
         self.squares[row][col] = player
@@ -42,12 +115,13 @@ class Board:
 
     #Checks if all the squares have been marked 
     def isfull(self):
-        return self.mark_sqr == 9
+        return self.marked_sqrs == 9
 
     #Checks if all the squares are empty
     def isempty(self):
-        return self.empty_sqr == 0 
+        return self.marked_sqrs == 0 
 
+  
     
 
 
@@ -58,6 +132,7 @@ class Game:
     def __init__(self):
         self.board = Board()
         self.player = 1  # 1 = X   2 = O
+        self.isrunning = True
         self.showlines()
 
     def showlines(self):
@@ -92,10 +167,7 @@ class Game:
             pygame.draw.line(WIN, X_COLOR, start_asc, end_asc, XO_WIDTH )
 
 
-            
-
-        
-        if self.player == 2: 
+        elif self.player == 2: 
             #Draws a circle
             center = (col * SQSIZE + SQSIZE // 2, row * SQSIZE + SQSIZE // 2 )
             pygame.draw.circle(WIN, O_COLOR, center, RADIUS, XO_WIDTH)
@@ -104,6 +176,11 @@ class Game:
     #Changes whos turn it is
     def next_turn(self):
         self.player = self.player % 2 + 1
+
+    #Checks to see if the game is over 
+    def isover(self):
+        return self.board.final_state(show=True) != 0 or self.board.isfull()
+
 
 
 
@@ -127,21 +204,21 @@ def main():
                 #use floor division to find which square somone has clicked on
                 row = pos[1] // SQSIZE
                 col = pos[0] // SQSIZE
-                
+
+
                 #Ensures square is empty then marks it with correct player
-                if board.empty_sqr(row, col):
+                if board.empty_sqr(row, col) and game.isrunning:
                     board.mark_sqr(row, col, game.player)
                     game.draw_fig(row, col)
 
-                    game.next_turn()
-                    
-                    
-             
-                    
-                
 
+                    #Checks for a win and stops game if someone has won
+                    if game.isover():
+                        game.isrunning = False
 
-
+                    #Goes to next players turn
+                    game.next_turn()           
+        #Updates the window to show everything new
         pygame.display.update()
 
 
