@@ -1,3 +1,4 @@
+import random
 import pygame
 import sys
 import numpy as np
@@ -122,8 +123,30 @@ class Board:
         return self.marked_sqrs == 0 
 
   
+class AI:
+    
+    def __init__(self, level = 0, player = 2):
+        self.level = level 
+        self.player = player 
+
+    #Returns a random empty row and col 
+    def rand(self, board):
+        empty_sqrs = board.get_empty_sqrs()
+        index = random.randrange(0, len(empty_sqrs))
+
+        return empty_sqrs[index]
     
 
+    def eval(self, main_board):
+        if self.level == 0:
+            #Random choice bot 
+            move = self.rand(main_board)
+
+        else: 
+            #Minimax choices
+            pass
+
+        return move
 
 
 
@@ -131,7 +154,9 @@ class Game:
 
     def __init__(self):
         self.board = Board()
+        self.ai = AI()
         self.player = 1  # 1 = X   2 = O
+        self.gamemode = 'ai'
         self.isrunning = True
         self.showlines()
 
@@ -190,6 +215,7 @@ def main():
     #Creates the board
     game = Game()
     board = game.board
+    ai = game.ai
 
 
     while True:
@@ -201,7 +227,7 @@ def main():
             #Checks for when mouse button is press
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = event.pos
-                #use floor division to find which square somone has clicked on
+                #Use floor division to find which square somone has clicked on
                 row = pos[1] // SQSIZE
                 col = pos[0] // SQSIZE
 
@@ -217,7 +243,25 @@ def main():
                         game.isrunning = False
 
                     #Goes to next players turn
-                    game.next_turn()           
+                    game.next_turn()      
+
+
+        if game.gamemode == 'ai' and game.player == ai.player:
+            #Updates the screen 
+            pygame.display.update()
+             
+            #AI methods 
+            row, col = ai.eval(board)
+
+
+
+           
+            board.mark_sqr(row, col, game.player)
+            game.draw_fig(row, col)
+            game.next_turn()  
+
+
+
         #Updates the window to show everything new
         pygame.display.update()
 
