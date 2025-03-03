@@ -1,3 +1,4 @@
+import copy
 import random
 import pygame
 import sys
@@ -125,7 +126,7 @@ class Board:
   
 class AI:
     
-    def __init__(self, level = 0, player = 2):
+    def __init__(self, level = 1, player = 2):
         self.level = level 
         self.player = player 
 
@@ -136,15 +137,77 @@ class AI:
 
         return empty_sqrs[index]
     
+    def minimax(self, board, maximizing):
+        #Check terminal case 
+        case = board.final_state()
+
+        #Player 1 wins 
+        if case == 1:
+            return 1, None
+        #Player 2 wins
+        elif case == 2:
+            return -1, None
+        #Draw 
+        elif board.isfull():
+            return 0, None
+
+        if maximizing: 
+            max_eval = -100
+            best_move = None 
+            empty_sqrs = board.get_empty_sqrs()
+
+            #For each empty sqr 
+            for (row, col) in empty_sqrs:
+                #Create a copy of current board to not damage main board 
+                temp_board = copy.deepcopy(board)
+                #Marks the move on copy 
+                temp_board.mark_sqr(row, col, 1)
+                #Recursivly calls the function with other person turn and gets first item in list 
+                eval = self.minimax(temp_board, False) [0]
+
+                #Saves the best move 
+                if eval > max_eval: 
+                    max_eval = eval
+                    best_move = (row, col)
+
+            return max_eval, best_move
+
+
+        elif not maximizing:
+            min_eval = 100
+            best_move = None 
+            empty_sqrs = board.get_empty_sqrs()
+
+            #For each empty sqr 
+            for (row, col) in empty_sqrs:
+                #Create a copy of current board to not damage main board 
+                temp_board = copy.deepcopy(board)
+                #Marks the move on copy 
+                temp_board.mark_sqr(row, col, self.player)
+                #Recursivly calls the function with other person turn and gets the first
+                eval = self.minimax(temp_board, True) [0]
+
+                #Saves the best move 
+                if eval < min_eval: 
+                    min_eval = eval
+                    best_move = (row, col)
+
+            return min_eval, best_move
+
+
+
 
     def eval(self, main_board):
         if self.level == 0:
             #Random choice bot 
             move = self.rand(main_board)
+            eval = 'random'
 
         else: 
             #Minimax choices
-            pass
+            eval, move = self.minimax(main_board, False)
+        
+        print(f'AI has chosen the square in pos {move} with an eval of {eval}.' )
 
         return move
 
@@ -177,6 +240,8 @@ class Game:
         # pygame.draw.line(WIN, LINE_COLOR, (0, (3 * SQSIZE)), (WIDTH, (3 * SQSIZE)), LINE_WIDTH)
         # pygame.draw.line(WIN, LINE_COLOR, (0, 0), (WIDTH, 0), LINE_WIDTH)
 
+    
+
     #Draws a circle or cross in the correct location 
     def draw_fig(self, row, col):
         
@@ -196,7 +261,6 @@ class Game:
             #Draws a circle
             center = (col * SQSIZE + SQSIZE // 2, row * SQSIZE + SQSIZE // 2 )
             pygame.draw.circle(WIN, O_COLOR, center, RADIUS, XO_WIDTH)
-
 
     #Changes whos turn it is
     def next_turn(self):
