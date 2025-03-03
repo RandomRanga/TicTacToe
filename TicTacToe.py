@@ -224,6 +224,9 @@ class Game:
         self.showlines()
 
     def showlines(self):
+        #Draws background
+        WIN.fill(BG_COLOR)
+
         # Vertical lines 
         pygame.draw.line(WIN, LINE_COLOR, (SQSIZE, 0), (SQSIZE, HEIGHT), LINE_WIDTH)
         pygame.draw.line(WIN, LINE_COLOR, (2 * SQSIZE, 0), (2 * SQSIZE, HEIGHT), LINE_WIDTH)
@@ -240,7 +243,11 @@ class Game:
         # pygame.draw.line(WIN, LINE_COLOR, (0, (3 * SQSIZE)), (WIDTH, (3 * SQSIZE)), LINE_WIDTH)
         # pygame.draw.line(WIN, LINE_COLOR, (0, 0), (WIDTH, 0), LINE_WIDTH)
 
-    
+    def make_move(self, row, col):
+        self.board.mark_sqr(row, col, self.player)
+        self.draw_fig(row, col)
+        self.next_turn()  
+
 
     #Draws a circle or cross in the correct location 
     def draw_fig(self, row, col):
@@ -266,6 +273,22 @@ class Game:
     def next_turn(self):
         self.player = self.player % 2 + 1
 
+    def change_gamemode(self):
+        if self.gamemode == 'pvp': 
+            self.gamemode = 'ai'
+        else:
+            self.gamemode = 'pvp'
+    
+    def change_starter(self):
+        if self.player == 1:
+            self.player = 2
+        else: 
+            self.player = 1
+
+    def restart(self):
+        self.__init__()
+
+
     #Checks to see if the game is over 
     def isover(self):
         return self.board.final_state(show=True) != 0 or self.board.isfull()
@@ -288,6 +311,33 @@ def main():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
+
+            if event.type == pygame.KEYDOWN:
+                # G key changes gamemode
+                if event.key == pygame.K_g:
+                    game.change_gamemode()
+                
+                #R = restart
+                if event.key == pygame.K_r:
+                    game.restart()
+                    board = game.board
+                    ai = game.ai
+
+                #0 = random AI
+                if event.key == pygame.K_0:
+                    ai.level = 0
+                
+                #1 = minimax 
+                if event.key == pygame.K_1:
+                    ai.level = 1
+                #c = changes who starts 
+                if event.key == pygame.K_c:
+                    game.change_starter()
+                    print(game.player)
+
+
+
             #Checks for when mouse button is press
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pos = event.pos
@@ -298,32 +348,24 @@ def main():
 
                 #Ensures square is empty then marks it with correct player
                 if board.empty_sqr(row, col) and game.isrunning:
-                    board.mark_sqr(row, col, game.player)
-                    game.draw_fig(row, col)
+                    game.make_move(row, col)
 
 
                     #Checks for a win and stops game if someone has won
                     if game.isover():
                         game.isrunning = False
 
-                    #Goes to next players turn
-                    game.next_turn()      
+            
 
-
-        if game.gamemode == 'ai' and game.player == ai.player:
+        if game.gamemode == 'ai' and game.player == ai.player and game.isrunning:
             #Updates the screen 
-            pygame.display.update()
-             
+            pygame.display.update()  
             #AI methods 
             row, col = ai.eval(board)
+            game.make_move(row, col) 
 
-
-
-           
-            board.mark_sqr(row, col, game.player)
-            game.draw_fig(row, col)
-            game.next_turn()  
-
+            if game.isover():
+                game.isrunning = False
 
 
         #Updates the window to show everything new
